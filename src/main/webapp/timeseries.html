@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Authentication Demo (mmckinlay)</title>
+        <script type="text/javascript" charset="utf-8" src="my-radian6.js"></script>
+        <script type="text/javascript">
+			var req;
+			function doGet() {
+				req = new XMLHttpRequest();
+				req.onreadystatechange = processReqChange;
+				req.open("GET", "timeseries?startdate=1318906800000&enddate=1320030000000&topics=296954&mediatypes=8,12&segmentation=2", true);
+				//req.open("GET", "auth_example.xml", true);
+				req.setRequestHeader("auth_user", "mmckinlay@modelmetrics.com");
+				req.setRequestHeader("auth_pass", "75db39324a88c42d9ff944f9a86d0141");
+				req.send();				
+			}
+			function processReqChange() {
+				//alert("processReqChange: " + " state:" + req.readyState + " status:" + req.status);
+			    // only if req shows "loaded"
+			    if (req.readyState == 4) {
+			        // only if "OK"
+			        if (req.status == 200) {
+						//alert("GOT IT");
+						var xmlDoc = req.responseXML;
+						doStuff(xmlDoc);
+						//var name = xmlDoc.getElementsByTagName("name")[0];
+						//var search = xmlDoc.getElementsByTagName("search")[0];
+						//document.getElementById("display_name").innerHTML = name.firstChild.nodeValue;
+						//document.getElementById("display_search").innerHTML = search.firstChild.nodeValue;
+			        } else {
+			            alert("There was a problem retrieving the XML data:\n" +
+			                + "Status: " + req.status + " Text: " +req.statusText);
+			        }
+			    }
+			}
+			
+			function doStuff(xmlDoc) {
+				var mydisplay = document.getElementById("mydisplay");
+				mydisplay.value = "TimeSeries Data\n";
+				var trends = new TopicTrends();
+				trends.loadFromXml(xmlDoc);
+				var data = trends.data; // Array of Datum
+				for (var i=0; i<data.length; i++) {
+					mydisplay.value += "Name:" + data[i].name + " Value:" + data[i].value + " Label:" + data[i].label + " Color:" + data[i].color + "\n";
+				}
+			}
+		</script>
+	</head>
+    <body>
+  <div>
+	<button type="button" onclick="doGet()">Go</button>
+  </div>
+	<textarea id="mydisplay" cols="80" rows="20"></textarea>
+    </body>
+</html>

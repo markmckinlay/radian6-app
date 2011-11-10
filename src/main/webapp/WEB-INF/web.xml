@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app 
+   xmlns="http://java.sun.com/xml/ns/javaee" 
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+   version="2.5">
+  <servlet>
+    <servlet-name>Hello</servlet-name>
+    <servlet-class>org.demo.HelloServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>TimeSeries</servlet-name>
+    <servlet-class>org.demo.TimeSeriesServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Hello</servlet-name>
+    <url-pattern>/hello/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>TimeSeries</servlet-name>
+    <url-pattern>/timeseries/*</url-pattern>
+  </servlet-mapping>
+</web-app>
