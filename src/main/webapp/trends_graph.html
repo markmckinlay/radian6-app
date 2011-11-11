@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+ <head>
+     
+  <link rel="stylesheet" type="text/css" href="js/examples.css" />
+  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="../excanvas.js"></script><![endif]-->
+    <link rel="stylesheet" type="text/css" href="js/jquery.jqplot.min.css" />
+    <script src="js/jquery.min.js" type="text/javascript"></script>
+    <script language="javascript" type="text/javascript" src="js/jquery.jqplot.js"></script>
+
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.canvasTextRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.highlighter.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.canvasOverlay.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.cursor.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.pointLabels.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.pieRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.barRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.dateAxisRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="my-radian6.js"></script>
+
+	<!-- The following scripts do the request to the server to get Radian6 timeseries data	-->
+    <script type="text/javascript">
+		var req;
+		function doGet() {
+			req = new XMLHttpRequest();
+			req.onreadystatechange = processReqChange;
+			req.open("GET", "timeseries?startdate=1318906800000&enddate=1320030000000&topics=299377&mediatypes=1,8,12&segmentation=2", true);
+			req.send();				
+		}
+		function processReqChange() {
+		    if (req.readyState == 4) {
+		        if (req.status == 200) {
+					var xmlDoc = req.responseXML;
+					doStuff(xmlDoc);
+		        } else {
+		            alert("There was a problem retrieving the XML data:\n" +
+		                + "Status: " + req.status + " Text: " +req.statusText);
+		        }
+		    }
+		}
+		
+		function doStuff(xmlDoc) {
+			var mydisplay = document.getElementById("mydisplay");
+			mydisplay.value = "TimeSeries Data\n";
+			var trends = new TopicTrends();
+			trends.loadFromXml(xmlDoc);
+			var data = trends.data; // Array of Datum
+			var data_series = [];
+			var data_series_object = new Object();
+			var micromedia = [];
+			for (var i=0; i<data.length; i++) {
+				mydisplay.value += "Name:" + data[i].name + " Value:" + data[i].value + " Label:" + data[i].label + " Color:" + data[i].color + "\n";
+				var key = data[i].name;
+				if (data_series_object[key] == null) {
+					data_series_object[key] = [];
+					data_series.push(data_series_object[key]);
+				}
+				data_series_object[key].push([ parseInt(data[i].label), parseInt(data[i].value) ] );
+			}
+			doLineGraph(data_series_object);
+		}
+	</script>
+
+	<!-- The following scripts handle the graph rendering -->
+    <script type="text/javascript">
+
+		// data_series is an Array of Array of int
+		function doLineGraph(data_series_object) {
+
+			var data_series_names = [];
+			var data_series = [];
+			for (var key in data_series_object) {
+				data_series_names.push(key);
+				data_series.push(data_series_object[key]);
+			}
+
+
+            var line = $.jqplot('chart1', data_series, {
+                title: 'Social Media Posts',
+                cursor: { show: true },
+                highlighter: { show: true },
+                seriesDefaults: { pointLabels: { show: true }},
+                axesDefaults: {
+                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                    labelOptions: {
+                        fontSize: '13pt'
+                    }
+                },
+				legend: {
+					renderder: $.jqplot.EnhancedLegendRenderer,
+					show: true,
+					labels: data_series_names,
+					rendererOptions:{numberRows: 1},
+					placement: 'outsideGrid',
+					location: 's'
+				},
+				grid: {
+					background: '#FFFFFF'
+				},
+                axes: {
+                    xaxis: {
+                        label: 'Date',
+                        renderer: $.jqplot.DateAxisRenderer,
+                        //min: '10/18/2011',
+                        tickInterval: '3 days',
+                        tickOptions: { formatString: '%b %#d' }
+                    },
+                    yaxis: {
+                        label: 'Number Of Posts'
+                    }
+                }
+            });
+			
+		}
+
+
+    </script>
+
+ </head>
+ <body>
+
+	<h3>Line Chart</h3>
+ <div id="chart1" style="height:400px; width:700px;">
+ </div>
+	<button type="button" onclick="doGet()">Go</button>
+	<textarea id="mydisplay" cols="80" rows="20"></textarea>
+ <div id="chart2" style="height:340px; width:500px;">
+ 	
+ </div>
+ <div id="chart3" style="height:340px; width:500px;">
+ 	
+ </div>
+
+ 
+</div>
+</body>
+ </html>
