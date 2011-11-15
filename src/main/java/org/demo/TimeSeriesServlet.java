@@ -115,6 +115,7 @@ public class TimeSeriesServlet extends HttpServlet
 		HttpSession session = request.getSession(true);
 		Object token = session.getAttribute("auth_token");
 		Object appkey = session.getAttribute("auth_appkey");
+		/**
 		if (token != null && appkey != null) {
 			return;
 		}
@@ -125,6 +126,7 @@ public class TimeSeriesServlet extends HttpServlet
 		session = request.getSession(true);
 		session.setAttribute("auth_token", auth.getToken());
 		session.setAttribute("auth_appkey", auth.getAppkey());
+		*/
 	}
 	
 	protected String getAuthToken(HttpServletRequest request) {

@@ -14,12 +14,12 @@ public class Authenticate {
 	private String token = "";
 	private String appkey = "";
 
-	public void execute() throws Exception {
+	public void execute(String username, String password) throws Exception {
         HttpClient httpclient = new HttpClient();
         GetMethod httpget = new GetMethod(BASE_SERVICE_URL + "/auth/authenticate");
         httpget.addRequestHeader("Accept" , "*/xml");
-        httpget.addRequestHeader("auth_user", "mmckinlay@modelmetrics.com");
-        httpget.addRequestHeader("auth_pass", hashPassword("geelong55"));
+        httpget.addRequestHeader("auth_user", username);
+        httpget.addRequestHeader("auth_pass", hashPassword(password));
         httpget.addRequestHeader("Content-Type", "text/*");
         
         try {

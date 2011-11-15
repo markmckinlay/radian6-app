@@ -12,6 +12,10 @@
     <servlet-name>TimeSeries</servlet-name>
     <servlet-class>org.demo.TimeSeriesServlet</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>Logon</servlet-name>
+    <servlet-class>org.demo.LogonServlet</servlet-class>
+  </servlet>
   <servlet-mapping>
     <servlet-name>Hello</servlet-name>
     <url-pattern>/hello/*</url-pattern>
@@ -19,5 +23,9 @@
   <servlet-mapping>
     <servlet-name>TimeSeries</servlet-name>
     <url-pattern>/timeseries/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Logon</servlet-name>
+    <url-pattern>/authenticate/*</url-pattern>
   </servlet-mapping>
 </web-app>
