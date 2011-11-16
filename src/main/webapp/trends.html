@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+ <head>
+     
+  <link rel="stylesheet" type="text/css" href="js/examples.css" />
+  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="../excanvas.js"></script><![endif]-->
+    <link rel="stylesheet" type="text/css" href="js/jquery.jqplot.min.css" />
+    <link rel="stylesheet" type="text/css" href="js/jquery-ui-1.8.16.custom.css" />
+    <script src="js/jquery.min.js" type="text/javascript"></script>
+    <script language="javascript" type="text/javascript" src="js/jquery.jqplot.js"></script>
+    <script src="js/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
+
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.canvasTextRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.highlighter.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.canvasOverlay.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.cursor.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.pointLabels.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.pieRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.barRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.dateAxisRenderer.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="my-radian6.js"></script>
+
+    <script type="text/javascript">
+		function doTopics() {
+			
+			// Clear the existing Topics
+			var select_box = document.getElementById("topic_id");
+			var num = select_box.options.length;
+			for (var i=0; i<num; i++) {
+				select_box.options.remove(0);
+			}
+			
+			
+			// Get the topics to load into the drop down list
+			req = new XMLHttpRequest();
+			//req.onreadystatechange = processReqChange;
+			req.open("GET", "topics", false); // do it synchronously
+			req.send();
+			var xmlDoc = req.responseXML;
+			var topic_list = new TopicList();
+			topic_list.loadFromXml(xmlDoc);
+			for (var i=0; i<topic_list.topics.length; i++) {
+				var topic = topic_list.topics[i];
+				var select_option = document.createElement("option");
+				select_option.text = topic.name;
+				select_option.value = topic.id;
+				select_box.add(select_option, null);
+			}			
+
+		}
+	</script>
+	<!-- The following scripts do the request to the server to get Radian6 timeseries data	-->
+    <script type="text/javascript">
+		var req;
+		function doGet() {
+			params = doGetInput();
+			req = new XMLHttpRequest();
+			req.onreadystatechange = processReqChange;
+			//req.open("GET", "timeseries?startdate=1318906800000&enddate=1320030000000&topics=299377&mediatypes=1,8,12&segmentation=2", true);
+			req.open("GET", "timeseries" + params, true);
+			req.send();				
+		}
+		function processReqChange() {
+		    if (req.readyState == 4) {
+		        if (req.status == 200) {
+					var xmlDoc = req.responseXML;
+					doStuff(xmlDoc);
+		        } else {
+		            alert("There was a problem retrieving the XML data:\n" +
+		                + "Status: " + req.status + " Text: " +req.statusText);
+		        }
+		    }
+		}
+		
+		function doStuff(xmlDoc) {
+			//var mydisplay = document.getElementById("mydisplay");
+			//mydisplay.value = "TimeSeries Data\n";
+			var trends = new TopicTrends();
+			trends.loadFromXml(xmlDoc);
+			var data = trends.data; // Array of Datum
+			var data_series = [];
+			var data_series_object = new Object();
+			var micromedia = [];
+			for (var i=0; i<data.length; i++) {
+				//mydisplay.value += "Name:" + data[i].name + " Value:" + data[i].value + " Label:" + data[i].label + " Color:" + data[i].color + "\n";
+				var key = data[i].name;
+				if (data_series_object[key] == null) {
+					data_series_object[key] = [];
+					data_series.push(data_series_object[key]);
+				}
+				data_series_object[key].push([ parseInt(data[i].label), parseInt(data[i].value) ] );
+			}
+			doLineGraph(data_series_object);
+		}
+	</script>
+
+	<!-- The following scripts handle the graph rendering -->
+    <script type="text/javascript">
+
+		// data_series is an Array of Array of int
+		function doLineGraph(data_series_object) {
+
+			var data_series_names = [];
+			var data_series = [];
+			for (var key in data_series_object) {
+				data_series_names.push(key);
+				data_series.push(data_series_object[key]);
+			}
+
+
+            var line = $.jqplot('chart1', data_series, {
+                title: 'Social Media Posts',
+                cursor: { show: true },
+                highlighter: { show: true },
+                seriesDefaults: { pointLabels: { show: true }},
+                axesDefaults: {
+                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                    labelOptions: {
+                        fontSize: '13pt'
+                    }
+                },
+				legend: {
+					renderder: $.jqplot.EnhancedLegendRenderer,
+					show: true,
+					labels: data_series_names,
+					rendererOptions:{numberRows: 1},
+					placement: 'outsideGrid',
+					location: 's'
+				},
+				grid: {
+					background: '#FFFFFF'
+				},
+                axes: {
+                    xaxis: {
+                        label: 'Date',
+                        renderer: $.jqplot.DateAxisRenderer,
+                        //min: '10/18/2011',
+                        tickInterval: '3 days',
+                        tickOptions: { formatString: '%b %#d' }
+                    },
+                    yaxis: {
+                        label: 'Number Of Posts'
+                    }
+                }
+            });
+			
+		}
+
+
+    </script>
+    <script type="text/javascript">
+
+		function doGetInput() {
+			// Get Topic
+			var topic_id = doTopic();
+			// Get Start Date
+			var start_date = doStartDate()
+			// Get End Date
+			var end_date = doEndDate()
+			// Get Media Types
+			var media_types = doMediaTypes();
+			// Get Segmentaion
+			var segmentation = doSegmentation();
+			// Do some simple validations
+			if (!doValidate(topic_id, start_date, end_date, media_types, segmentation)) {
+				return;
+			}
+			// Create request string
+			var request_string = "?startdate=" + start_date + "&enddate=" + end_date + "&mediatypes=";
+			
+			for (var i=0; i<media_types.length; i++) {
+				if (i>0) {
+					request_string += ",";
+				}
+				request_string += media_types[i];
+			}
+			request_string += "&topics=" + topic_id + "&segmentation=" + segmentation;
+			//alert(request_string);
+			return request_string;
+		}
+		function doTopic() {
+			var topic = document.getElementById("topic_id");
+			return topic.options[topic.selectedIndex].value;
+		}
+		function doStartDate() {
+			var date_input = document.getElementById("startdatepicker");
+			var date = new Date(date_input.value);
+			var millis = date.getTime();
+			return millis;
+		}
+		function doEndDate() {
+			var date_input = document.getElementById("enddatepicker");
+			var date = new Date(date_input.value);
+			var millis = date.getTime();
+			return millis;
+		}
+		function doMediaTypes() {
+			var result = [];
+			var media_types = document.getElementsByName("media_types");
+			for (var i=0; i<media_types.length; i++) {
+				if (media_types[i].checked) {
+					result.push(media_types[i].value);
+				}
+			}	
+			return result;					
+		}
+		function doSegmentation() {
+			var seg_options = document.getElementsByName("segmentation");
+			for (var i=0; i<seg_options.length; i++) {
+				if (seg_options[i].checked) {
+					return seg_options[i].value;
+				}
+			}			
+		}
+		function doValidate(topic_id, start_date, end_date, media_types, segmentation) {
+			if (isNaN(topic_id)) {
+				alert("No Topic Selected");
+				return false;
+			}
+			if (isNaN(start_date)) {
+				alert("No Start Date Selected");
+				return false;
+			}
+			if (isNaN(end_date)) {
+				alert("No End Date Selected");
+				return false;
+			}
+			if (end_date <= start_date) {
+				alert("End Date must be > Start Date");
+				return false;
+			}
+			if (media_types.length < 1) {
+				alert("No Media Types Selected");
+				return false;
+			}
+			if (isNaN(segmentation)) {
+				alert("No Segmentation Selected");
+				return false;
+			}
+			return true;
+		}
+
+    </script>
+	<script type="text/javascript">
+	$(function() {
+		$( "#startdatepicker" ).datepicker( { minDate: -30,
+			                             maxDate: -1,
+										showOn: "button",
+										buttonImage: "images/calendar.gif",
+										defaultDate: -14,
+										buttonImageOnly: true
+			                           });
+	});
+	$(function() {
+		$( "#enddatepicker" ).datepicker( { minDate: -30,
+			                             maxDate: -1,
+										showOn: "button",
+										buttonImage: "images/calendar.gif",
+										showButtonPanel: true,
+										defaultDate: -1,
+										buttonImageOnly: true
+			                           });
+	});
+	</script>
+
+ </head>
+ <body onload="doTopics()">
+
+	<h3>Controls</h3>
+
+
+
+	<div class="demo">
+		Topic:
+		<select id="topic_id">
+		</select>
+
+	Start Date: <input type="text" id="startdatepicker" size="11" disabled="disabled"> End Date  : <input type="text" id="enddatepicker" size="11" disabled="disabled"><p>
+
+	<input type="checkbox" name="media_types" value="1" checked="yes">Blogs</input>
+	<input type="checkbox" name="media_types" value="8" checked="yes">MicroMedia</input>
+	<input type="checkbox" name="media_types" value="12" checked="yes">Facebook</input>
+	<input type="checkbox" name="media_types" value="10">Forums</input>
+	<input type="checkbox" name="media_types" value="9">Forum Replies</input>
+	<input type="checkbox" name="media_types" value="11">Comments</input><br>
+	<input type="checkbox" name="media_types" value="5">News</input>
+	<input type="checkbox" name="media_types" value="2">Videos</input>
+	<input type="checkbox" name="media_types" value="4">Images</input>
+	<input type="checkbox" name="media_types" value="13">Aggregator</input>
+	<input type="checkbox" name="media_types" value="14">Buy/Sell</input>
+	<input type="checkbox" name="media_types" value="16">MySpace</input><p>
+
+	<input type="radio" name="segmentation" value="2" checked="yes">Media</input>
+	<input type="radio" name="segmentation" value="0">Region</input>
+	<input type="radio" name="segmentation" value="1">Language</input><p>
+
+	<input type="button" value="Go" onclick="doGet()"><p>
+
+
+
+
+	<h3>Line Chart</h3>
+ <div id="chart1" style="height:400px; width:700px;">
+ </div>
+<!--
+	<button type="button" onclick="doGet()">Go</button>
+	<textarea id="mydisplay" cols="80" rows="20"></textarea>
+ <div id="chart2" style="height:340px; width:500px;">
+ 	
+ </div>
+ <div id="chart3" style="height:340px; width:500px;">
+ 	
+ </div>
+
+ 
+</div>
+-->
+</body>
+ </html>
