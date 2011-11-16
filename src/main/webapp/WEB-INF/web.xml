@@ -20,6 +20,10 @@
     <servlet-name>Topics</servlet-name>
     <servlet-class>org.demo.TopicsServlet</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>Proxy</servlet-name>
+    <servlet-class>org.demo.ProxyServlet</servlet-class>
+  </servlet>
   <servlet-mapping>
     <servlet-name>Hello</servlet-name>
     <url-pattern>/hello/*</url-pattern>
@@ -35,5 +39,9 @@
   <servlet-mapping>
     <servlet-name>Topics</servlet-name>
     <url-pattern>/topics/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Proxy</servlet-name>
+    <url-pattern>/proxy/*</url-pattern>
   </servlet-mapping>
 </web-app>
