@@ -28,6 +28,9 @@ public class Authenticate {
 			AuthParser ap = new AuthParser(xml_resp);
 			token = ap.getToken();
 			appkey = ap.getUserKey();
+			if (token == null || appkey == null || token.length() == 0 || appkey.length() == 0) {
+				throw new Exception("Authentication failed:" + xml_resp);
+			}
 		} catch (Exception ex) {
 			throw ex;
         } finally {

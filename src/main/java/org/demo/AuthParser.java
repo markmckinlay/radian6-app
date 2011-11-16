@@ -19,6 +19,9 @@ public class AuthParser {
 
 	private Document document;
 	public AuthParser(String xml) throws Exception {
+		if (xml == null || xml.trim().length() == 0) {
+			throw new Exception("Authentication failed");
+		}
 		ByteArrayInputStream xml_stream = new ByteArrayInputStream(xml.getBytes());
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setValidating(false);

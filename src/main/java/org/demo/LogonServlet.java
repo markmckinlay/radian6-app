@@ -31,7 +31,7 @@ public class LogonServlet extends HttpServlet
 			doStuff(response.getWriter(), request);			
 			request.getRequestDispatcher("start.html").forward(request, response);
 		} catch (Exception ex) {
-			response.getWriter().println("Exception calling Radian6: " + ex.toString());
+			response.getWriter().println("<exception>Exception calling Radian6: " + ex.toString() + "</exception>");
 		}
     }
 	
@@ -43,11 +43,11 @@ public class LogonServlet extends HttpServlet
 			throw new Exception("Invalid credentials");
 		}
 		doAuthenticate(session, user_obj.toString(), pass_obj.toString());
-		writer.print("<authentication><auth_token>");
-		writer.print(getAuthToken(session));		
-		writer.print("</auth_token><auth_appkey>");
-		writer.print(getAuthAppkey(session));		
-		writer.println("</auth_appkey></authentication>");
+		//writer.print("<authentication><auth_token>");
+		//writer.print(getAuthToken(session));		
+		//writer.print("</auth_token><auth_appkey>");
+		//writer.print(getAuthAppkey(session));		
+		//writer.println("</auth_appkey></authentication>");
 	}
 
 	protected void doAuthenticate(HttpSession session, String username, String password) throws Exception {
